@@ -1,6 +1,6 @@
 # microservice.py
 from flask import Flask, request, jsonify
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 
@@ -41,10 +41,10 @@ def list_events():
 
 @app.route('/notifications', methods=['GET'])
 def get_notifications():
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     soon_events = [
         event for event in events
-        if datetime.fromisoformat(event['start_time']) - now <= timedelta(minutes=30)
+        if datetime.fromisoformat(event['start_time']).replace(tzinfo=timezone.utc) - now <= timedelta(minutes=30)
     ]
     return jsonify(soon_events), 200
 
