@@ -19,14 +19,21 @@ def create_event():
     except ValueError:
         return jsonify({"error": "Invalid time format. Use ISO 8601."}), 400
 
-    event = {
-        'id': len(events) + 1,
-        'event_name': event_name,
-        'vtuber_name': vtuber_name,
-        'start_time': parsed_time.isoformat()
-    }
-    events.append(event)
-    return jsonify(event), 201
+    # Check if the event is already in the list and update it if it is
+    existing_event = next((event for event in events if event['event_name'] == event_name), None)
+    if existing_event:
+        existing_event['vtuber_name'] = vtuber_name
+        existing_event['start_time'] = parsed_time.isoformat()
+        return jsonify(event), 200
+    else:
+        event = {
+            'id': len(events) + 1,
+            'event_name': event_name,
+            'vtuber_name': vtuber_name,
+            'start_time': parsed_time.isoformat()
+        }
+        events.append(event)
+        return jsonify(event), 201
 
 @app.route('/events', methods=['GET'])
 def list_events():
